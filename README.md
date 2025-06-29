@@ -91,24 +91,6 @@ scrapy crawl cinema_qualite
 - `created_at`: 作成日時
 - `updated_at`: 更新日時
 
-## 開発状況
-
-### 完了済み
-- [x] Scrapyプロジェクトの基本構造作成
-- [x] DynamoDB Local環境構築（Docker Compose）
-- [x] DynamoDBテーブル作成（TheaterTable, MovieTable）
-- [x] 基本的なスクレイピング機能実装
-- [x] DynamoDBデータ投入機能実装
-- [x] データ検証パイプライン実装
-
-### 今後の予定
-- [ ] 実際の映画館サイトに対応したスパイダー実装
-- [ ] エラーハンドリングとリトライ機能強化
-- [ ] スケジュール実行機能（CloudWatch Events対応）
-- [ ] AWS Lambda対応
-- [ ] FastAPI実装（フェーズ2）
-- [ ] Next.jsフロントエンド実装（フェーズ3）
-
 ## 注意事項
 
 - スクレイピング対象サイトの利用規約を遵守してください
