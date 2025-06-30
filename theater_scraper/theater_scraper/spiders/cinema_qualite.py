@@ -6,11 +6,11 @@ from theater_scraper.items import TheaterItem, MovieItem
 
 class CinemaQualiteSpider(scrapy.Spider):
     name = "cinema_qualite"
-    allowed_domains = ["www.cinema-qualite.com"]
-    start_urls = ["https://www.cinema-qualite.com/lineup/"]
+    allowed_domains = ["qualite.musashino-k.jp"]
+    start_urls = ["https://qualite.musashino-k.jp/"]
     
     theater_id = "cinema_qualite"
-    theater_name = "シネマカリテ"
+    theater_name = "新宿シネマカリテ"
 
     def parse(self, response):
         """映画館情報と作品一覧をスクレイピング"""
@@ -19,7 +19,7 @@ class CinemaQualiteSpider(scrapy.Spider):
         theater_item = TheaterItem()
         theater_item['theater_id'] = self.theater_id
         theater_item['name'] = self.theater_name
-        theater_item['official_url'] = "https://www.cinema-qualite.com/"
+        theater_item['official_url'] = "https://qualite.musashino-k.jp/"
         theater_item['last_updated'] = datetime.now().isoformat()
         yield theater_item
         
