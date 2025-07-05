@@ -10,7 +10,7 @@ from botocore.exceptions import ClientError
 
 def create_dynamodb_tables():
     """DynamoDB LocalにTheaterTableとMovieTableを作成"""
-    
+
     # DynamoDB Local接続設定
     dynamodb = boto3.resource(
         'dynamodb',
@@ -19,7 +19,7 @@ def create_dynamodb_tables():
         aws_access_key_id='dummy',
         aws_secret_access_key='dummy'
     )
-    
+
     # TheaterTable作成
     try:
         theater_table = dynamodb.create_table(
@@ -41,13 +41,13 @@ def create_dynamodb_tables():
         print("TheaterTable作成中...")
         theater_table.wait_until_exists()
         print("TheaterTable作成完了")
-        
+
     except ClientError as e:
         if e.response['Error']['Code'] == 'ResourceInUseException':
             print("TheaterTableは既に存在します")
         else:
             print(f"TheaterTable作成エラー: {e}")
-    
+
     # MovieTable作成 (detail_urlをプライマリキーとして使用)
     try:
         movie_table = dynamodb.create_table(
@@ -87,7 +87,7 @@ def create_dynamodb_tables():
         print("MovieTable作成中...")
         movie_table.wait_until_exists()
         print("MovieTable作成完了")
-        
+
     except ClientError as e:
         if e.response['Error']['Code'] == 'ResourceInUseException':
             print("MovieTableは既に存在します")
@@ -104,7 +104,7 @@ def delete_table(table_name):
         aws_access_key_id='dummy',
         aws_secret_access_key='dummy'
     )
-    
+
     try:
         table = dynamodb.Table(table_name)
         table.delete()
@@ -126,7 +126,7 @@ def list_tables():
         aws_access_key_id='dummy',
         aws_secret_access_key='dummy'
     )
-    
+
     try:
         response = dynamodb.list_tables()
         print("\n作成されたテーブル:")
