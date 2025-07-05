@@ -162,3 +162,6 @@ data/
 config.ini
 settings.ini
 secrets.json
+
+.claude/*
+AI_INSTRUCTIONS.md
