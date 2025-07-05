@@ -60,20 +60,23 @@ class DynamoDBPipeline:
         spider.logger.info(f"映画館保存: {item_data['name']}")
     
     def _save_movie_item(self, adapter, spider):
-        """映画アイテムをMovieTableに保存"""
+        """映画アイテムをMovieTableに保存 (detail_urlベースで上書き)"""
         table = self.dynamodb.Table('MovieTable')
         
+        # detail_urlをプライマリキーとして使用
+        detail_url = adapter.get('detail_url')
+        
         item_data = {
-            'movie_id': adapter.get('movie_id'),
+            'detail_url': detail_url,  # プライマリキー
             'theater_id': adapter.get('theater_id'),
             'title': adapter.get('title'),
             'image_url': adapter.get('image_url') or '',
             'synopsis': adapter.get('synopsis') or '',
-            'detail_url': adapter.get('detail_url'),
             'created_at': adapter.get('created_at'),
             'updated_at': adapter.get('updated_at')
         }
         
+        # put_itemは既存レコードを自動的に上書きする
         table.put_item(Item=item_data)
         spider.logger.info(f"映画保存: {item_data['title']}")
 
@@ -87,7 +90,7 @@ class ValidationPipeline:
         if isinstance(item, TheaterItem):
             required_fields = ['theater_id', 'name', 'official_url']
         elif isinstance(item, MovieItem):
-            required_fields = ['movie_id', 'theater_id', 'title']
+            required_fields = ['detail_url', 'theater_id', 'title']
         else:
             return item
         
