@@ -76,6 +76,12 @@ class DynamoDBPipeline:
             'updated_at': adapter.get('updated_at')
         }
         
+        # TMDb関連フィールドがあれば追加
+        if adapter.get('tmdb_id'):
+            item_data['tmdb_id'] = adapter.get('tmdb_id')
+        if adapter.get('tmdb_poster_path'):
+            item_data['tmdb_poster_path'] = adapter.get('tmdb_poster_path')
+        
         # put_itemは既存レコードを自動的に上書きする
         table.put_item(Item=item_data)
         spider.logger.info(f"映画保存: {item_data['title']}")

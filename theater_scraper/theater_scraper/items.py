@@ -16,10 +16,17 @@ class TheaterItem(scrapy.Item):
 
 class MovieItem(scrapy.Item):
     """作品情報アイテム"""
+    # 基本情報
     theater_id = scrapy.Field()
     title = scrapy.Field()
     image_url = scrapy.Field()
     synopsis = scrapy.Field()
-    detail_url = scrapy.Field()
+    detail_url = scrapy.Field()  # プライマリキーとして使用
+    
+    # TMDb API関連フィールド
+    tmdb_id = scrapy.Field()
+    tmdb_poster_path = scrapy.Field()
+    
+    # タイムスタンプ
     created_at = scrapy.Field()
     updated_at = scrapy.Field()

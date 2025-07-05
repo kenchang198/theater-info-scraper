@@ -5,7 +5,6 @@
 
 import boto3
 from datetime import datetime
-import hashlib
 
 
 def insert_test_data():
@@ -40,35 +39,35 @@ def insert_test_data():
         }
     ]
     
-    # テスト映画データ
+    # テスト映画データ（detail_urlがプライマリキー）
     test_movies = [
         {
-            'movie_id': hashlib.md5('test_theater_1_映画A'.encode()).hexdigest(),
+            'detail_url': 'https://example.com/movies/movie_a',  # プライマリキー
             'theater_id': 'test_theater_1',
             'title': '映画A',
             'image_url': 'https://example.com/images/movie_a.jpg',
             'synopsis': 'これは映画Aのあらすじです。テスト用のダミーデータです。',
-            'detail_url': 'https://example.com/movies/movie_a',
+            'tmdb_id': '12345',  # TMDb ID（テスト用）
+            'tmdb_poster_path': '/test_poster_a.jpg',  # TMDbポスターパス（テスト用）
             'created_at': datetime.now().isoformat(),
             'updated_at': datetime.now().isoformat()
         },
         {
-            'movie_id': hashlib.md5('test_theater_1_映画B'.encode()).hexdigest(),
+            'detail_url': 'https://example.com/movies/movie_b',  # プライマリキー
             'theater_id': 'test_theater_1',
             'title': '映画B',
             'image_url': 'https://example.com/images/movie_b.jpg',
             'synopsis': 'これは映画Bのあらすじです。感動的なストーリーが展開されます。',
-            'detail_url': 'https://example.com/movies/movie_b',
             'created_at': datetime.now().isoformat(),
             'updated_at': datetime.now().isoformat()
         },
         {
-            'movie_id': hashlib.md5('test_theater_2_映画C'.encode()).hexdigest(),
+            'detail_url': 'https://example.com/movies/movie_c',  # プライマリキー
             'theater_id': 'test_theater_2',
             'title': '映画C',
             'image_url': 'https://example.com/images/movie_c.jpg',
             'synopsis': 'これは映画Cのあらすじです。アクション満載の作品です。',
-            'detail_url': 'https://example.com/movies/movie_c',
+            'tmdb_id': '67890',  # TMDb ID（テスト用）
             'created_at': datetime.now().isoformat(),
             'updated_at': datetime.now().isoformat()
         }
@@ -113,9 +112,10 @@ def verify_data():
     print("\n=== 映画データ確認 ===")
     response = movie_table.scan()
     for item in response['Items']:
-        print(f"ID: {item['movie_id'][:8]}..., "
+        print(f"URL: {item['detail_url']}, "
               f"映画館: {item['theater_id']}, "
-              f"タイトル: {item['title']}")
+              f"タイトル: {item['title']}, "
+              f"TMDb ID: {item.get('tmdb_id', 'なし')}")
     
     # 映画館別映画検索テスト
     print("\n=== 映画館別映画検索テスト ===")
