@@ -16,7 +16,6 @@ class TheaterItem(scrapy.Item):
 
 class MovieItem(scrapy.Item):
     """作品情報アイテム"""
-    movie_id = scrapy.Field()
     theater_id = scrapy.Field()
     title = scrapy.Field()
     image_url = scrapy.Field()
