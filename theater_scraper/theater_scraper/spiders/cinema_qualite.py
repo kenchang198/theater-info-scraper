@@ -99,13 +99,18 @@ class CinemaQualiteSpider(scrapy.Spider):
             
             # あらすじ
             synopsis_texts = []
-            # メインのテキストコンテナから取得
-            for text_block in response.css('.module-text .text p'):
-                text = text_block.css('::text').get()
-                if text and text.strip():
-                    # 上映期間やスタッフ情報を除外
-                    if not any(keyword in text for keyword in ['上映期間:', '上映時間:', '©', '(C)']):
-                        synopsis_texts.append(text.strip())
+            # メインのテキストコンテナから取得（.is-metaクラスを除外）
+            for text_block in response.css('.module-text'):
+                # .is-metaクラスを持つ要素をスキップ
+                if text_block.css('.text.is-meta'):
+                    continue
+                # テキストを含むpタグを取得
+                for p in text_block.css('.text p'):
+                    text = p.css('::text').get()
+                    if text and text.strip():
+                        # 上映期間やスタッフ情報を除外
+                        if not any(keyword in text for keyword in ['上映期間:', '上映時間:', '©', '(C)']):
+                            synopsis_texts.append(text.strip())
             
             synopsis = ' '.join(synopsis_texts)
             if len(synopsis) > 200:
