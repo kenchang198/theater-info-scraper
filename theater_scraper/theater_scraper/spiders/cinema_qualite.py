@@ -166,8 +166,8 @@ class CinemaQualiteSpider(scrapy.Spider):
             if detail_url and not detail_url.startswith('http'):
                 detail_url = response.urljoin(detail_url)
             
-            # あらすじを取得（短縮版）
-            synopsis = card.css('.synopsis::text, .description::text, p::text').get()
+            # あらすじを取得（短縮版）- .is-metaクラス要素を除外
+            synopsis = card.css('.synopsis:not(.is-meta)::text, .description:not(.is-meta)::text, p:not(.is-meta)::text').get()
             if synopsis:
                 synopsis = synopsis.strip()[:200] + "..." if len(synopsis) > 200 else synopsis.strip()
             
