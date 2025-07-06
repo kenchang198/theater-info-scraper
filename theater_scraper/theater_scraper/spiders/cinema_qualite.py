@@ -30,19 +30,8 @@ class CinemaQualiteSpider(scrapy.Spider):
         # 重複を避けるためのセット
         processed_urls = set()
         
-        # 各映画リンクを処理
+        # 各映画リンクを処理して詳細ページへ
         for link in movie_links:
-            movie_item = self.parse_movie_link(link, response)
-            if movie_item:
-                detail_url = movie_item.get('detail_url', '')
-                if detail_url not in processed_urls:
-                    processed_urls.add(detail_url)
-                    yield movie_item
-    
-    def parse_movie_link(self, link, response):
-        """スライダーのリンクから映画情報を解析"""
-        try:
-            # 詳細ページURLを取得
             detail_url = link.css('::attr(href)').get()
             if detail_url:
                 if not detail_url.startswith('http'):
@@ -52,136 +41,96 @@ class CinemaQualiteSpider(scrapy.Spider):
                 
                 # 映画一覧ページ（/movies/のみ）を除外
                 if detail_url.endswith('/movies/'):
-                    return None
-            
-            # タイトルを取得 - HTML構造に基づく正確なセレクタ
-            title = link.css('div.description div.text h4.title b::text').get()
-            
-            # フォールバック: <b>タグがない場合
-            if not title:
-                title = link.css('div.description div.text h4.title::text').get()
-            
-            # さらなるフォールバック: 最初のリンクのような場合
-            if not title:
-                title = link.css('b::text').get()
-            
-            if not title:
-                self.logger.warning(f"タイトルが取得できませんでした: {detail_url}")
-                return None
-            
-            title = title.strip()
-            
-            # 上映期間情報を取得
-            showing_period = link.xpath('.//text()[contains(., "まで")]').get()
-            if showing_period:
-                showing_period = showing_period.strip()
-            
-            movie_item = MovieItem()
-            movie_item['theater_id'] = self.theater_id
-            movie_item['title'] = title
-            movie_item['image_url'] = ""
-            movie_item['synopsis'] = showing_period or ""
-            movie_item['detail_url'] = detail_url or response.url
-            movie_item['created_at'] = datetime.now().isoformat()
-            movie_item['updated_at'] = datetime.now().isoformat()
-            
-            return movie_item
-            
-        except Exception as e:
-            self.logger.error(f"スライダーリンク解析エラー: {e}")
-            return None
+                    continue
+                
+                if detail_url not in processed_urls:
+                    processed_urls.add(detail_url)
+                    # 詳細ページをリクエスト
+                    yield scrapy.Request(detail_url, callback=self.parse_movie_detail)
     
-    def parse_movie_article(self, article, response):
-        """記事から映画情報を解析"""
+    def parse_movie_detail(self, response):
+        """映画詳細ページから情報を抽出"""
         try:
-            # 詳細ページURLを取得
-            detail_url = article.css('a::attr(href)').get()
-            if detail_url:
-                if not detail_url.startswith('http'):
-                    detail_url = response.urljoin(detail_url)
-                # HTTPSに正規化して重複を防ぐ
-                detail_url = detail_url.replace('http://', 'https://')
-                
-                # 映画一覧ページ（/movies/のみ）を除外
-                if detail_url.endswith('/movies/'):
-                    return None
-                
-                # ニュース記事を除外（/movies/を含むURLのみ処理）
-                if '/movies/' not in detail_url:
-                    return None
-            
-            # タイトルを取得 - 複数の候補から
-            title = (article.css('h4::text').get() or 
-                    article.css('h3::text').get() or 
-                    article.css('h2::text').get() or
-                    article.css('a::text').get() or
-                    article.css('.title::text').get())
+            # タイトル
+            title = response.css('h1 b::text').get()
+            if not title:
+                title = response.css('h1::text').get()
             
             if not title:
-                self.logger.warning(f"タイトルが取得できませんでした: {detail_url}")
-                return None
+                self.logger.warning(f"タイトルが取得できませんでした: {response.url}")
+                return
             
             title = title.strip()
             
-            # 上映期間情報を取得
-            showing_period = article.xpath('.//text()[contains(., "まで")]').get()
-            if showing_period:
-                showing_period = showing_period.strip()
+            # 映画情報をdlリストから取得
+            movie_info = {}
+            for dl in response.css('dl'):
+                dt_text = dl.css('dt b::text').get()
+                if not dt_text:
+                    dt_text = dl.css('dt::text').get()
+                
+                dd_text = dl.css('dd p::text').get()
+                if not dd_text:
+                    dd_text = dl.css('dd::text').get()
+                
+                if dt_text and dd_text:
+                    movie_info[dt_text.strip()] = dd_text.strip()
             
+            # 公式サイトURL
+            official_website = None
+            if '公式HP' in movie_info:
+                # URLを含むaタグから取得
+                official_link = response.xpath('//dt[contains(text(), "公式HP")]/following-sibling::dd//a/@href').get()
+                if official_link:
+                    official_website = official_link
+            
+            # 製作年を抽出
+            release_year = None
+            if '制作年／制作国' in movie_info:
+                import re
+                year_match = re.search(r'(\d{4})年', movie_info['制作年／制作国'])
+                if year_match:
+                    release_year = int(year_match.group(1))
+            
+            # 画像URL
+            image_url = response.css('.module-image img::attr(src)').get()
+            if not image_url and response.css('meta[property="og:image"]'):
+                image_url = response.css('meta[property="og:image"]::attr(content)').get()
+            
+            # あらすじ
+            synopsis_texts = []
+            # メインのテキストコンテナから取得
+            for text_block in response.css('.module-text .text p'):
+                text = text_block.css('::text').get()
+                if text and text.strip():
+                    # 上映期間やスタッフ情報を除外
+                    if not any(keyword in text for keyword in ['上映期間:', '上映時間:', '©', '(C)']):
+                        synopsis_texts.append(text.strip())
+            
+            synopsis = ' '.join(synopsis_texts)
+            if len(synopsis) > 200:
+                synopsis = synopsis[:200] + "..."
+            
+            # 上映期間
+            showing_period = movie_info.get('上映期間', '')
+            
+            # MovieItemを作成
             movie_item = MovieItem()
             movie_item['theater_id'] = self.theater_id
             movie_item['title'] = title
-            movie_item['image_url'] = ""
-            movie_item['synopsis'] = showing_period or ""
-            movie_item['detail_url'] = detail_url or response.url
+            movie_item['original_title'] = None  # この劇場サイトには原題情報がない場合が多い
+            movie_item['release_year'] = release_year
+            movie_item['official_website'] = official_website
+            movie_item['image_url'] = image_url or ""
+            movie_item['synopsis'] = synopsis or showing_period
+            movie_item['detail_url'] = response.url
             movie_item['created_at'] = datetime.now().isoformat()
             movie_item['updated_at'] = datetime.now().isoformat()
             
-            return movie_item
+            self.logger.info(f"映画詳細取得: {title} ({release_year}) - {official_website}")
+            
+            yield movie_item
             
         except Exception as e:
-            self.logger.error(f"記事解析エラー: {e}")
-            return None
-
-    def parse_movie_card(self, card, response):
-        """映画カード情報を解析"""
-        try:
-            # タイトルを取得
-            title = card.css('h1::text, h2::text, h3::text, .title::text, .movie-title::text').get()
-            if not title:
-                title = card.css('a::text').get()
-            
-            if not title:
-                return None
-            
-            title = title.strip()
-            
-            # 画像URLを取得
-            image_url = card.css('img::attr(src)').get()
-            if image_url and not image_url.startswith('http'):
-                image_url = response.urljoin(image_url)
-            
-            # 詳細ページURLを取得
-            detail_url = card.css('a::attr(href)').get()
-            if detail_url and not detail_url.startswith('http'):
-                detail_url = response.urljoin(detail_url)
-            
-            # あらすじを取得（短縮版）
-            synopsis = card.css('.synopsis::text, .description::text, p::text').get()
-            if synopsis:
-                synopsis = synopsis.strip()[:200] + "..." if len(synopsis) > 200 else synopsis.strip()
-            
-            movie_item = MovieItem()
-            movie_item['theater_id'] = self.theater_id
-            movie_item['title'] = title
-            movie_item['image_url'] = image_url
-            movie_item['synopsis'] = synopsis or ""
-            movie_item['detail_url'] = detail_url or response.url
-            movie_item['created_at'] = datetime.now().isoformat()
-            movie_item['updated_at'] = datetime.now().isoformat()
-            
-            return movie_item
-            
-        except Exception as e:
-            self.logger.error(f"映画カード解析エラー: {e}")
-            return None
+            self.logger.error(f"詳細ページ解析エラー ({response.url}): {e}")
+    
