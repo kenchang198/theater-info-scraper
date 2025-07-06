@@ -72,8 +72,7 @@ docker-compose.yml          # DynamoDB Local設定
 3. DynamoDBPipelineがローカルDynamoDBテーブルにデータを保存
 
 ### DynamoDBスキーマ
-- **TheaterTable**: プライマリキー `theater_id`（String）
-- **MovieTable**: プライマリキー `movie_id`（String）、`theater_id`でGSI
+詳細な設計については[要件定義書](https://github.com/kenchang198/theater_info_prj_docs/blob/main/requirements.md)を参照してください。
 
 ### 主要コンポーネント
 - **Items**（`items.py`）: 映画館と作品のデータ構造を定義
@@ -83,9 +82,8 @@ docker-compose.yml          # DynamoDB Local設定
 
 ### 開発パターン
 - 全てのスパイダーはTheaterItemとMovieItemの両方をyieldする
-- `hashlib.md5()`を使用してtheater_idとtitleからユニークなmovie_idを生成
 - スパイダー実装には適切なエラーハンドリングとログ出力を含める
-- 既存のパイプライン順序に従う: ValidationPipeline（100）→ DynamoDBPipeline（300）
+- 既存のパイプライン順序に従う: ValidationPipeline（100）→ TMDbPipeline（200）→ DynamoDBPipeline（300）
 
 ### ローカル開発
 - DynamoDB LocalはDocker Composeでポート8000で実行
