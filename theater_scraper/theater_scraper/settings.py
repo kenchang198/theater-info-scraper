@@ -68,6 +68,7 @@ RANDOMIZE_DOWNLOAD_DELAY = True
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     "theater_scraper.pipelines.ValidationPipeline": 100,
+    "theater_scraper.pipelines.TMDbPipeline": 200,
     "theater_scraper.pipelines.DynamoDBPipeline": 300,
 }
 
@@ -94,3 +95,7 @@ AUTOTHROTTLE_DEBUG = True
 
 # Set settings whose default value is deprecated to a future-proof value
 FEED_EXPORT_ENCODING = "utf-8"
+
+# TMDb API設定
+# 環境変数から読み込むため、ここでは設定しない
+# TMDB_ACCESS_TOKENを.envファイルに設定してください
