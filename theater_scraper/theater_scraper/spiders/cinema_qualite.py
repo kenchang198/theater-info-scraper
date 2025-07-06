@@ -92,11 +92,6 @@ class CinemaQualiteSpider(scrapy.Spider):
                 if year_match:
                     release_year = int(year_match.group(1))
             
-            # 画像URL
-            image_url = response.css('.module-image img::attr(src)').get()
-            if not image_url and response.css('meta[property="og:image"]'):
-                image_url = response.css('meta[property="og:image"]::attr(content)').get()
-            
             # あらすじ
             synopsis_texts = []
             # メインのテキストコンテナから取得
@@ -121,7 +116,6 @@ class CinemaQualiteSpider(scrapy.Spider):
             movie_item['original_title'] = None  # この劇場サイトには原題情報がない場合が多い
             movie_item['release_year'] = release_year
             movie_item['official_website'] = official_website
-            movie_item['image_url'] = image_url or ""
             movie_item['synopsis'] = synopsis or showing_period
             movie_item['detail_url'] = response.url
             movie_item['created_at'] = datetime.now().isoformat()
