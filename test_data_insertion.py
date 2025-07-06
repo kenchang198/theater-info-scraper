@@ -45,7 +45,6 @@ def insert_test_data():
             'detail_url': 'https://example.com/movies/movie_a',  # プライマリキー
             'theater_id': 'test_theater_1',
             'title': '映画A',
-            'image_url': 'https://example.com/images/movie_a.jpg',
             'synopsis': 'これは映画Aのあらすじです。テスト用のダミーデータです。',
             'tmdb_id': '12345',  # TMDb ID（テスト用）
             'tmdb_poster_path': '/test_poster_a.jpg',  # TMDbポスターパス（テスト用）
@@ -56,7 +55,6 @@ def insert_test_data():
             'detail_url': 'https://example.com/movies/movie_b',  # プライマリキー
             'theater_id': 'test_theater_1',
             'title': '映画B',
-            'image_url': 'https://example.com/images/movie_b.jpg',
             'synopsis': 'これは映画Bのあらすじです。感動的なストーリーが展開されます。',
             'created_at': datetime.now().isoformat(),
             'updated_at': datetime.now().isoformat()
@@ -65,7 +63,6 @@ def insert_test_data():
             'detail_url': 'https://example.com/movies/movie_c',  # プライマリキー
             'theater_id': 'test_theater_2',
             'title': '映画C',
-            'image_url': 'https://example.com/images/movie_c.jpg',
             'synopsis': 'これは映画Cのあらすじです。アクション満載の作品です。',
             'tmdb_id': '67890',  # TMDb ID（テスト用）
             'created_at': datetime.now().isoformat(),
