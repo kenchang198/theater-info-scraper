@@ -59,6 +59,10 @@ theater_scraper/             # Scrapyプロジェクトディレクトリ
 │   ├── pipelines.py         # DynamoDB保存パイプライン
 │   ├── settings.py          # Scrapy設定
 │   └── spiders/             # スパイダー実装
+sample_html/                # 各劇場のHTMLソースコピー
+├── [theater_id]/           # 各劇場のtheater_idフォルダ
+│   ├── list.html           # 一覧ページのHTML
+│   └── detail.html         # 詳細ページのHTML
 create_tables.py            # DynamoDBテーブル作成スクリプト
 test_data_insertion.py      # テストデータ挿入スクリプト
 docker-compose.yml          # DynamoDB Local設定
@@ -97,6 +101,12 @@ docker-compose.yml          # DynamoDB Local設定
 - `response.urljoin()`を使用して相対URLを処理
 - あらすじを200文字で切り詰め、"..."サフィックスを追加
 - 日時フィールドにはISO形式のタイムスタンプを使用
+
+### スクレイピング開発
+- 各劇場のHTMLソースは`sample_html/[theater_id]/`に保存
+- `list.html`: 上映作品一覧ページのHTMLソース
+- `detail.html`: 作品詳細ページのHTMLソース
+- 新しいスパイダー実装時は、実際のHTMLを参照してセレクタを開発
 
 ### 画像取得アーキテクチャ
 - **実装方式**: スクレイピング時にTMDb APIを同時実行
