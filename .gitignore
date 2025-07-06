@@ -158,6 +158,8 @@ data/
 *.json
 *.xml
 
+sample_html/*
+
 # Config files with sensitive information
 config.ini
 settings.ini
