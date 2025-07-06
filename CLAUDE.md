@@ -99,3 +99,26 @@ docker-compose.yml          # DynamoDB Local設定
 - `response.urljoin()`を使用して相対URLを処理
 - あらすじを200文字で切り詰め、"..."サフィックスを追加
 - 日時フィールドにはISO形式のタイムスタンプを使用
+
+### 画像取得アーキテクチャ
+- **実装方式**: スクレイピング時にTMDb APIを同時実行
+- **認証方式**: Bearer認証トークンを使用（より安全）
+- **画像サイズ**: w300（ポスター表示用）
+- **エラー処理**: TMDb APIエラー時は画像情報なしで処理継続
+- **レート制限対策**: 0.1秒/リクエストの遅延を設定
+- **パイプライン順序**: ValidationPipeline（100）→ TMDbPipeline（200）→ DynamoDBPipeline（300）
+
+### TMDb API統合
+- **環境変数**:
+  - `TMDB_API_KEY`: APIキー（互換性のため保持）
+  - `TMDB_ACCESS_TOKEN`: Bearer認証用アクセストークン
+- **取得データ**:
+  - `tmdb_id`: TMDb映画ID
+  - `tmdb_poster_path`: ポスター画像パス
+- **画像URL構成**: `https://image.tmdb.org/t/p/w300/[poster_path]`
+- **APIリファレンス**: https://developer.themoviedb.org/reference/intro/getting-started
+
+### TMDb APIデバッグ
+- **専用ログファイル**: `tmdb_api.log`に詳細なAPIリクエスト/レスポンスを記録
+- **テストスクリプト**: `python test_tmdb_api.py`でAPI動作を単体テスト
+- **ログ分離**: Scrapy本体のログとTMDb APIログを分離して問題を切り分け
