@@ -85,9 +85,10 @@ scrapy crawl cinema_qualite
 - `movie_id` (PK): 作品ID
 - `theater_id` (GSI): 映画館ID
 - `title`: 作品タイトル
-- `image_url`: サムネイル画像URL
 - `synopsis`: あらすじ（抜粋）
 - `detail_url`: 詳細ページURL
+- `tmdb_id`: TMDb映画ID
+- `tmdb_poster_path`: TMDbポスター画像パス
 - `created_at`: 作成日時
 - `updated_at`: 更新日時
 

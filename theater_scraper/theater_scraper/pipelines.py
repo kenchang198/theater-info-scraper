@@ -76,7 +76,6 @@ class DynamoDBPipeline:
             'detail_url': detail_url,  # プライマリキー
             'theater_id': adapter.get('theater_id'),
             'title': adapter.get('title'),
-            'image_url': adapter.get('image_url') or '',
             'synopsis': adapter.get('synopsis') or '',
             'created_at': adapter.get('created_at'),
             'updated_at': adapter.get('updated_at')
