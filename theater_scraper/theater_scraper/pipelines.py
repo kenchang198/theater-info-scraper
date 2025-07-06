@@ -84,8 +84,6 @@ class DynamoDBPipeline:
         # 新しいフィールドを追加
         if adapter.get('original_title'):
             item_data['original_title'] = adapter.get('original_title')
-        if adapter.get('release_year'):
-            item_data['release_year'] = adapter.get('release_year')
         if adapter.get('official_website'):
             item_data['official_website'] = adapter.get('official_website')
         

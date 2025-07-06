@@ -20,7 +20,7 @@ class MovieItem(scrapy.Item):
     theater_id = scrapy.Field()
     title = scrapy.Field()
     original_title = scrapy.Field()  # 原題（英語タイトル）
-    release_year = scrapy.Field()  # 製作年
+    release_year = scrapy.Field()  # 製作年（TMDb検索用、DBには保存しない）
     official_website = scrapy.Field()  # 公式サイトURL
     synopsis = scrapy.Field()
     detail_url = scrapy.Field()  # プライマリキーとして使用
